@@ -1,5 +1,11 @@
 # mcprobe
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/tamish560/mcprobe?style=flat-square)](https://goreportcard.com/report/github.com/tamish560/mcprobe)
+[![Go Version](https://img.shields.io/badge/Go-1.23-00ADD8?style=flat-square&logo=go)](https://go.dev)
+[![License: MIT](https://img.shields.io/badge/license-MIT-0F172A?style=flat-square)](./LICENSE)
+[![Release](https://img.shields.io/github/v/release/tamish560/mcprobe?style=flat-square&label=release)](https://github.com/tamish560/mcprobe/releases)
+[![Tests](https://img.shields.io/badge/tests-19%20passing-22C55E?style=flat-square)](./mcprobe_test.go)
+
 Security scanner and introspection tool for MCP (Model Context Protocol) servers.
 
 Connect to any MCP server, introspect its tools/prompts/resources, detect prompt injection patterns in tool descriptions, find tool shadowing across servers, and baseline for drift detection (rug-pull attacks).
@@ -26,6 +32,8 @@ cd mcprobe
 go build -o mcprobe
 ```
 
+Or download a prebuilt binary from the [latest release](https://github.com/tamish560/mcprobe/releases).
+
 ## Quick Start
 
 Scan a stdio MCP server:
@@ -38,6 +46,12 @@ Scan an HTTP MCP server:
 
 ```
 mcprobe -http http://localhost:3000/mcp
+```
+
+Scan an SSE MCP server:
+
+```
+mcprobe -sse http://localhost:3000/sse
 ```
 
 List tools without security scan:
@@ -139,11 +153,13 @@ When a tool's description changes between baseline and current scan, the server 
 
 ```
 transport.go   MCP client transport (stdio + HTTP)
+sse.go         SSE (Server-Sent Events) transport
 client.go      JSON-RPC client, server introspection
 scanner.go     Security analysis engine, pattern detection, shadowing
 baseline.go    Snapshot persistence, drift detection
 report.go      Text, JSON, SARIF output renderers
 main.go        CLI entry point, flag parsing
+mcprobe_test.go  19 tests: scanner, shadowing, risk scoring, drift detection
 ```
 
 No external dependencies. Pure Go standard library. Builds to a single static binary.
