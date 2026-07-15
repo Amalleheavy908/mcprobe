@@ -16,6 +16,7 @@ type Config struct {
 	Command    string
 	Args       []string
 	Endpoint   string
+	SSEEndpoint string
 	Format     string
 	Baseline   string
 	Diff       string
@@ -31,6 +32,7 @@ func parseArgs() (*Config, error) {
 
 	flag.StringVar(&cfg.Command, "command", "", "Command to run MCP server via stdio (e.g. 'node server.js')")
 	flag.StringVar(&cfg.Endpoint, "http", "", "HTTP endpoint of MCP server (e.g. http://localhost:3000/mcp)")
+	flag.StringVar(&cfg.SSEEndpoint, "sse", "", "SSE endpoint of MCP server (e.g. http://localhost:3000/sse)")
 	flag.StringVar(&cfg.Format, "format", "text", "Output format: text, json, sarif")
 	flag.StringVar(&cfg.Baseline, "baseline", "", "Save baseline snapshot to file")
 	flag.StringVar(&cfg.Diff, "diff", "", "Compare current server against baseline file")
@@ -45,6 +47,7 @@ func parseArgs() (*Config, error) {
 		fmt.Fprintf(os.Stderr, "Usage:\n")
 		fmt.Fprintln(os.Stderr, "  mcprobe -command 'node server.js'                        # scan stdio server")
 		fmt.Fprintln(os.Stderr, "  mcprobe -http http://localhost:3000/mcp                  # scan HTTP server")
+	fmt.Fprintln(os.Stderr, "  mcprobe -sse http://localhost:3000/sse                   # scan SSE server")
 		fmt.Fprintln(os.Stderr, "  mcprobe -command 'node server.js' -baseline snap.json   # save baseline")
 		fmt.Fprintln(os.Stderr, "  mcprobe -command 'node server.js' -diff snap.json       # detect drift")
 		fmt.Fprintln(os.Stderr, "  mcprobe -shadow -shadow-dir ./baselines/                 # check tool shadowing")
@@ -64,7 +67,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if cfg.Command == "" && cfg.Endpoint == "" && !cfg.Shadow {
+	if cfg.Command == "" && cfg.Endpoint == "" && cfg.SSEEndpoint == "" && !cfg.Shadow {
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -101,6 +104,16 @@ func main() {
 		outputResult(snap, cfg)
 		return
 	}
+
+	if cfg.SSEEndpoint != "" {
+		snap, err := scanSSE(ctx, cfg.SSEEndpoint, cfg)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		outputResult(snap, cfg)
+		return
+	}
 }
 
 func scanStdio(ctx context.Context, command string, args []string, cfg *Config) (*ScanResult, error) {
@@ -121,6 +134,22 @@ func scanStdio(ctx context.Context, command string, args []string, cfg *Config) 
 
 func scanHTTP(ctx context.Context, endpoint string, cfg *Config) (*ScanResult, error) {
 	transport := NewHTTPTransport(endpoint)
+	defer transport.Close()
+
+	client := NewClient(transport)
+	snap, err := client.Snapshot(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("snapshot: %w", err)
+	}
+
+	return processSnapshot(snap, cfg)
+}
+
+func scanSSE(ctx context.Context, endpoint string, cfg *Config) (*ScanResult, error) {
+	transport, err := NewSSETransport(endpoint)
+	if err != nil {
+		return nil, fmt.Errorf("sse transport: %w", err)
+	}
 	defer transport.Close()
 
 	client := NewClient(transport)
