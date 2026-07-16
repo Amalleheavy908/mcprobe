@@ -68,7 +68,7 @@ func DiffSnapshots(old, new *ServerSnapshot) []Diff {
 			diffs = append(diffs, Diff{
 				Type:     "tool-removed",
 				Tool:     name,
-				Detail:   fmt.Sprintf("Tool '%s' was removed from the server", name),
+				Detail:   fmt.Sprintf("tool '%s' is gone. someone removed it. hope you weren't using it.", name),
 				Severity: "HIGH",
 			})
 		}
@@ -80,7 +80,7 @@ func DiffSnapshots(old, new *ServerSnapshot) []Diff {
 			diffs = append(diffs, Diff{
 				Type:     "tool-added",
 				Tool:     name,
-				Detail:   fmt.Sprintf("Tool '%s' was added to the server", name),
+				Detail:   fmt.Sprintf("tool '%s' showed up. it wasn't there before. you didn't add it. who did?", name),
 				Severity: "MEDIUM",
 			})
 			continue
@@ -89,7 +89,7 @@ func DiffSnapshots(old, new *ServerSnapshot) []Diff {
 			diffs = append(diffs, Diff{
 				Type:     "tool-description-changed",
 				Tool:     name,
-				Detail:   fmt.Sprintf("Tool '%s' description changed (potential rug-pull)", name),
+				Detail:   fmt.Sprintf("tool '%s' description changed. someone rewrote what it does. you trusted the old description. do you trust the new one?", name),
 				Severity: "CRITICAL",
 			})
 		}
@@ -98,7 +98,7 @@ func DiffSnapshots(old, new *ServerSnapshot) []Diff {
 			diffs = append(diffs, Diff{
 				Type:     "tool-schema-changed",
 				Tool:     name,
-				Detail:   fmt.Sprintf("Tool '%s' input schema changed", name),
+				Detail:   fmt.Sprintf("tool '%s' schema changed. the inputs are different now. your agent doesn't know that.", name),
 				Severity: "HIGH",
 			})
 		}
@@ -118,7 +118,7 @@ func DiffSnapshots(old, new *ServerSnapshot) []Diff {
 			diffs = append(diffs, Diff{
 				Type:     "prompt-removed",
 				Tool:     name,
-				Detail:   fmt.Sprintf("Prompt '%s' was removed", name),
+				Detail:   fmt.Sprintf("prompt '%s' disappeared.", name),
 				Severity: "LOW",
 			})
 		}
@@ -128,7 +128,7 @@ func DiffSnapshots(old, new *ServerSnapshot) []Diff {
 			diffs = append(diffs, Diff{
 				Type:     "prompt-added",
 				Tool:     name,
-				Detail:   fmt.Sprintf("Prompt '%s' was added", name),
+				Detail:   fmt.Sprintf("prompt '%s' is new. you didn't add it.", name),
 				Severity: "LOW",
 			})
 		}
@@ -147,7 +147,7 @@ func DiffSnapshots(old, new *ServerSnapshot) []Diff {
 			diffs = append(diffs, Diff{
 				Type:     "resource-removed",
 				Tool:     uri,
-				Detail:   fmt.Sprintf("Resource '%s' was removed", uri),
+				Detail:   fmt.Sprintf("resource '%s' is gone.", uri),
 				Severity: "MEDIUM",
 			})
 		}
@@ -158,7 +158,7 @@ func DiffSnapshots(old, new *ServerSnapshot) []Diff {
 			diffs = append(diffs, Diff{
 				Type:     "resource-added",
 				Tool:     uri,
-				Detail:   fmt.Sprintf("Resource '%s' was added", uri),
+				Detail:   fmt.Sprintf("resource '%s' appeared. you didn't add it. who did?", uri),
 				Severity: "MEDIUM",
 			})
 			continue
@@ -167,7 +167,7 @@ func DiffSnapshots(old, new *ServerSnapshot) []Diff {
 			diffs = append(diffs, Diff{
 				Type:     "resource-changed",
 				Tool:     uri,
-				Detail:   fmt.Sprintf("Resource '%s' description changed", uri),
+				Detail:   fmt.Sprintf("resource '%s' description changed.", uri),
 				Severity: "MEDIUM",
 			})
 		}
@@ -177,7 +177,7 @@ func DiffSnapshots(old, new *ServerSnapshot) []Diff {
 		diffs = append(diffs, Diff{
 			Type:     "version-changed",
 			Tool:     "",
-			Detail:   fmt.Sprintf("Server version changed from '%s' to '%s'", old.Info.Version, new.Info.Version),
+			Detail:   fmt.Sprintf("server version went from '%s' to '%s'. someone updated it. or replaced it.", old.Info.Version, new.Info.Version),
 			Severity: "LOW",
 		})
 	}
