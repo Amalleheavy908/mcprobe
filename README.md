@@ -4,13 +4,25 @@
 [![Go Version](https://img.shields.io/badge/Go-1.23-00ADD8?style=flat-square&logo=go)](https://go.dev)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0F172A?style=flat-square)](./LICENSE)
 [![Release](https://img.shields.io/github/v/release/tamish560/mcprobe?style=flat-square&label=release)](https://github.com/tamish560/mcprobe/releases)
-[![Tests](https://img.shields.io/badge/tests-19%20passing-22C55E?style=flat-square)](./mcprobe_test.go)
+[![Tests](https://img.shields.io/badge/tests-23%20passing-22C55E?style=flat-square)](./mcprobe_test.go)
 
 Security scanner and introspection tool for MCP (Model Context Protocol) servers.
 
-Connect to any MCP server, introspect its tools/prompts/resources, detect prompt injection patterns in tool descriptions, find tool shadowing across servers, and baseline for drift detection (rug-pull attacks).
+Connect to any MCP server, introspect its tools/prompts/resources, detect prompt injection patterns in tool descriptions, find tool shadowing across servers, audit resource exposure to sensitive paths and credentials, and baseline for drift detection (rug-pull attacks).
 
 Single binary. Zero dependencies. Go stdlib only.
+
+## Checks
+
+| Check | Severity | What it finds |
+|-------|----------|---------------|
+| Prompt injection | CRITICAL | Instruction-like text in tool descriptions and schema properties |
+| Tool shadowing | HIGH | Same tool name across multiple servers causing ambiguity |
+| Resource exposure | HIGH/MEDIUM | Tools that reference sensitive paths (/etc, .ssh, .env) or accept unrestricted file paths |
+| Path traversal | HIGH | Resource URIs containing `..` sequences |
+| Oversized descriptions | MEDIUM | Tool descriptions over 2000 chars that may hide embedded instructions |
+| Missing metadata | LOW | Tools or prompts without descriptions or schemas |
+| Baseline drift | INFO | Server capabilities changed since last baseline (rug-pull detection) |
 
 ## Why
 
