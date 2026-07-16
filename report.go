@@ -56,42 +56,44 @@ type SARIFLocation struct {
 func RenderText(result *ScanResult) string {
 	var sb strings.Builder
 
-	sb.WriteString(fmt.Sprintf("mcprobe scan report\n"))
-	sb.WriteString(fmt.Sprintf("========================================\n\n"))
-	sb.WriteString(fmt.Sprintf("Server: %s v%s\n", result.Server.Name, result.Server.Version))
-	sb.WriteString(fmt.Sprintf("Tools: %d  Prompts: %d  Resources: %d\n", len(result.Tools), len(result.Prompts), len(result.Resources)))
-	sb.WriteString(fmt.Sprintf("Risk Score: %.0f/100  Level: %s\n\n", result.RiskScore, result.RiskLevel))
+	sb.WriteString("mcprobe\n")
+	sb.WriteString("========================================\n\n")
+	sb.WriteString(fmt.Sprintf("server: %s v%s\n", result.Server.Name, result.Server.Version))
+	sb.WriteString(fmt.Sprintf("tools: %d  prompts: %d  resources: %d\n", len(result.Tools), len(result.Prompts), len(result.Resources)))
+	sb.WriteString(fmt.Sprintf("risk: %.0f/100  %s\n\n", result.RiskScore, result.RiskLevel))
 
 	if len(result.Findings) == 0 && len(result.Shadows) == 0 {
-		sb.WriteString("No findings. Server looks clean.\n")
+		sb.WriteString("no findings. server looks clean.\n")
+		sb.WriteString("that doesn't mean it's safe. it means i didn't find anything.\n")
+		sb.WriteString("there's a difference. you should know the difference.\n")
 		return sb.String()
 	}
 
 	if len(result.Findings) > 0 {
-		sb.WriteString(fmt.Sprintf("Findings (%d)\n", len(result.Findings)))
+		sb.WriteString(fmt.Sprintf("%d problems\n", len(result.Findings)))
 		sb.WriteString("----------------------------------------\n")
 		for i, f := range result.Findings {
 			sb.WriteString(fmt.Sprintf("%d. [%s] %s\n", i+1, f.Severity, f.Title))
 			if f.ToolName != "" {
-				sb.WriteString(fmt.Sprintf("   Tool: %s\n", f.ToolName))
+				sb.WriteString(fmt.Sprintf("   tool: %s\n", f.ToolName))
 			}
 			sb.WriteString(fmt.Sprintf("   %s\n", f.Detail))
 			if f.Evidence != "" {
-				sb.WriteString(fmt.Sprintf("   Pattern: %s\n", f.Evidence))
+				sb.WriteString(fmt.Sprintf("   pattern: %s\n", f.Evidence))
 			}
 			if f.Suggestion != "" {
-				sb.WriteString(fmt.Sprintf("   Fix: %s\n", f.Suggestion))
+				sb.WriteString(fmt.Sprintf("   fix: %s\n", f.Suggestion))
 			}
 			sb.WriteString("\n")
 		}
 	}
 
 	if len(result.Shadows) > 0 {
-		sb.WriteString(fmt.Sprintf("Tool Shadowing (%d)\n", len(result.Shadows)))
+		sb.WriteString(fmt.Sprintf("shadowing (%d)\n", len(result.Shadows)))
 		sb.WriteString("----------------------------------------\n")
 		for _, s := range result.Shadows {
 			sb.WriteString(fmt.Sprintf("[%s] %s\n", s.Severity, s.ToolName))
-			sb.WriteString(fmt.Sprintf("   Servers: %s\n", strings.Join(s.Servers, ", ")))
+			sb.WriteString(fmt.Sprintf("   servers: %s\n", strings.Join(s.Servers, ", ")))
 			sb.WriteString(fmt.Sprintf("   %s\n\n", s.Detail))
 		}
 	}
@@ -155,7 +157,7 @@ func RenderSARIF(result *ScanResult) (string, error) {
 				ID:   ruleID,
 				Name: "tool-shadowing",
 			}
-			rule.ShortDescription.Text = "Tool name conflict across servers"
+			rule.ShortDescription.Text = "tool name conflict across servers"
 			rules = append(rules, rule)
 		}
 
