@@ -95,10 +95,10 @@ func scanToolDescription(tool *Tool, result *ScanResult) {
 		result.Findings = append(result.Findings, Finding{
 			Severity:   "LOW",
 			Category:   "missing-metadata",
-			Title:      "Tool has no description",
-			Detail:     fmt.Sprintf("Tool '%s' has no description, making it impossible to audit its purpose", tool.Name),
+			Title:      "no description",
+			Detail:     fmt.Sprintf("tool '%s' has no description. the model will guess what it does. the model will guess wrong.", tool.Name),
 			ToolName:   tool.Name,
-			Suggestion: "Add a clear description to every tool",
+			Suggestion:  "write a description. it's not optional.",
 		})
 		return
 	}
@@ -108,11 +108,11 @@ func scanToolDescription(tool *Tool, result *ScanResult) {
 			result.Findings = append(result.Findings, Finding{
 				Severity:   "CRITICAL",
 				Category:   "prompt-injection",
-				Title:      "Tool description contains injection pattern",
-				Detail:     fmt.Sprintf("Tool '%s' description contains a known prompt injection pattern", tool.Name),
+				Title:      "injection in tool description",
+				Detail:     fmt.Sprintf("tool '%s' has injection text in its description. a model will follow it. this is not a warning. this is what will happen.", tool.Name),
 				ToolName:   tool.Name,
 				Evidence:   p.String(),
-				Suggestion: "Remove instruction-like text from tool descriptions",
+				Suggestion:  "remove the instruction text. or don't. see what happens.",
 			})
 		}
 	}
@@ -121,10 +121,10 @@ func scanToolDescription(tool *Tool, result *ScanResult) {
 		result.Findings = append(result.Findings, Finding{
 			Severity:   "MEDIUM",
 			Category:   "oversized-description",
-			Title:      "Tool description is unusually large",
-			Detail:     fmt.Sprintf("Tool '%s' description is %d characters, which may hide embedded instructions", tool.Name, len(tool.Description)),
+			Title:      "description is too long",
+			Detail:     fmt.Sprintf("tool '%s' description is %d characters. nobody reads that. including the model. something could be hiding in there.", tool.Name, len(tool.Description)),
 			ToolName:   tool.Name,
-			Suggestion: "Keep tool descriptions concise and focused",
+			Suggestion:  "cut it down. if you need 2000 chars to describe a tool, the tool does too much.",
 		})
 	}
 }
@@ -134,10 +134,10 @@ func scanToolSchema(tool *Tool, result *ScanResult) {
 		result.Findings = append(result.Findings, Finding{
 			Severity:   "LOW",
 			Category:   "missing-schema",
-			Title:      "Tool has no input schema",
-			Detail:     fmt.Sprintf("Tool '%s' has no input schema defined", tool.Name),
+			Title:      "no input schema",
+			Detail:     fmt.Sprintf("tool '%s' has no schema. the model will send whatever it wants. you will receive whatever it sends.", tool.Name),
 			ToolName:   tool.Name,
-			Suggestion: "Define an input schema for type safety and validation",
+			Suggestion:  "define a schema. or enjoy the chaos.",
 		})
 		return
 	}
@@ -154,11 +154,11 @@ func scanToolSchema(tool *Tool, result *ScanResult) {
 						result.Findings = append(result.Findings, Finding{
 							Severity:   "HIGH",
 							Category:   "prompt-injection",
-							Title:      "Schema property contains injection pattern",
-							Detail:     fmt.Sprintf("Tool '%s' property '%s' description contains injection pattern", tool.Name, propName),
+							Title:      "injection in schema",
+							Detail:     fmt.Sprintf("tool '%s' property '%s' has injection text. you put it in the schema. the model reads the schema. good luck.", tool.Name, propName),
 							ToolName:   tool.Name,
 							Evidence:   p.String(),
-							Suggestion: "Remove instruction-like text from schema descriptions",
+							Suggestion:  "remove it.",
 						})
 					}
 				}
@@ -170,8 +170,8 @@ func scanToolSchema(tool *Tool, result *ScanResult) {
 		result.Findings = append(result.Findings, Finding{
 			Severity:   "LOW",
 			Category:   "complex-schema",
-			Title:      "Tool has many required fields",
-			Detail:     fmt.Sprintf("Tool '%s' has %d required fields, increasing attack surface", tool.Name, len(req)),
+			Title:      "too many required fields",
+			Detail:     fmt.Sprintf("tool '%s' has %d required fields. that's not a tool. that's a form.", tool.Name, len(req)),
 			ToolName:   tool.Name,
 		})
 	}
@@ -182,8 +182,8 @@ func scanPrompt(prompt *Prompt, result *ScanResult) {
 		result.Findings = append(result.Findings, Finding{
 			Severity: "LOW",
 			Category: "missing-metadata",
-			Title:    "Prompt has no description",
-			Detail:   fmt.Sprintf("Prompt '%s' has no description", prompt.Name),
+			Title:    "prompt has no description",
+			Detail:   fmt.Sprintf("prompt '%s' has no description. nobody knows what it does. including you, probably.", prompt.Name),
 		})
 		return
 	}
@@ -193,8 +193,8 @@ func scanPrompt(prompt *Prompt, result *ScanResult) {
 			result.Findings = append(result.Findings, Finding{
 				Severity: "HIGH",
 				Category: "prompt-injection",
-				Title:    "Prompt description contains injection pattern",
-				Detail:   fmt.Sprintf("Prompt '%s' description contains a known prompt injection pattern", prompt.Name),
+				Title:    "injection in prompt",
+				Detail:   fmt.Sprintf("prompt '%s' has injection text in its description. you put instructions in a prompt description. think about that.", prompt.Name),
 				Evidence: p.String(),
 			})
 		}
@@ -206,8 +206,8 @@ func scanResource(resource *Resource, result *ScanResult) {
 		result.Findings = append(result.Findings, Finding{
 			Severity: "MEDIUM",
 			Category: "invalid-resource",
-			Title:    "Resource has no URI",
-			Detail:   fmt.Sprintf("Resource '%s' has no URI", resource.Name),
+			Title:    "resource has no URI",
+			Detail:   fmt.Sprintf("resource '%s' has no URI. it points to nothing. it is nothing.", resource.Name),
 		})
 	}
 
@@ -215,12 +215,11 @@ func scanResource(resource *Resource, result *ScanResult) {
 		result.Findings = append(result.Findings, Finding{
 			Severity: "HIGH",
 			Category: "path-traversal",
-			Title:    "Resource URI contains path traversal",
-			Detail:   fmt.Sprintf("Resource '%s' URI '%s' contains '..' which may allow path traversal", resource.Name, resource.URI),
+			Title:    "path traversal in resource URI",
+			Detail:   fmt.Sprintf("resource '%s' URI is '%s'. it has '..' in it. you know what that does. or you should.", resource.Name, resource.URI),
 		})
 	}
 }
-
 
 
 var sensitivePathPatterns = []*regexp.Regexp{
@@ -259,11 +258,11 @@ func scanResourceExposure(tool *Tool, result *ScanResult) {
 				result.Findings = append(result.Findings, Finding{
 					Severity:   "HIGH",
 					Category:   "resource-exposure",
-					Title:      "Tool parameter references sensitive path or credential",
-					Detail:     fmt.Sprintf("Tool '%s' parameter '%s' appears to reference sensitive files or credentials", tool.Name, propName),
+					Title:      "tool wants your secrets",
+					Detail:     fmt.Sprintf("tool '%s' parameter '%s' references sensitive files or credentials. /etc, .ssh, .env, keys. you connected this to your agent. think about that.", tool.Name, propName),
 					ToolName:   tool.Name,
 					Evidence:   p.String(),
-					Suggestion: "Restrict parameter to safe directories or validate input against an allowlist",
+					Suggestion:  "restrict the parameter. or don't. it's your server.",
 				})
 			}
 		}
@@ -273,10 +272,10 @@ func scanResourceExposure(tool *Tool, result *ScanResult) {
 				result.Findings = append(result.Findings, Finding{
 					Severity:   "MEDIUM",
 					Category:   "resource-exposure",
-					Title:      "Tool accepts unrestricted file path",
-					Detail:     fmt.Sprintf("Tool '%s' parameter '%s' accepts file paths without documented restrictions", tool.Name, propName),
+					Title:      "unrestricted file access",
+					Detail:     fmt.Sprintf("tool '%s' parameter '%s' takes any file path. /etc/passwd. your ssh keys. your .env. nothing stops it. but the README has a nice logo so it's probably fine.", tool.Name, propName),
 					ToolName:   tool.Name,
-					Suggestion: "Document allowed paths or add path validation in the tool implementation",
+					Suggestion:  "add path validation. or keep pretending nothing will go wrong.",
 				})
 			}
 		}
@@ -303,7 +302,7 @@ func DetectShadowing(snapshots map[string]*ServerSnapshot) []ShadowConflict {
 				ToolName: toolName,
 				Servers:  servers,
 				Severity: severity,
-				Detail:   fmt.Sprintf("Tool '%s' is defined by %d servers: %s", toolName, len(servers), strings.Join(servers, ", ")),
+				Detail:   fmt.Sprintf("tool '%s' exists on %d servers: %s. your agent won't know which one it's calling. neither will you. this will be fun to debug.", toolName, len(servers), strings.Join(servers, ", ")),
 			})
 		}
 	}
